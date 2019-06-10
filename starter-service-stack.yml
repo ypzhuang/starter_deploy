@@ -1,0 +1,42 @@
+version: '3.2'
+networks:
+  starter-network:
+    external:
+      name: starter-network
+
+services:
+  service-starter:
+      image: ${REGISTRY}/ypzhuang/service-starter:${TAG}
+      deploy:
+        replicas: ${REPLICAS}
+        restart_policy:
+          condition: on-failure
+      ports:
+        - 8080:8080
+      environment:
+        - SPRING_PROFILES_ACTIVE=${PROFILE}
+        - SPRING_DATASOURCE_URL=${DATASOURCE_URL}
+        - SPRING_DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+        - SPRING_REDIS_HOST=redis-service
+      depends_on:
+        - redis-service   
+      networks:
+        - starter-network
+
+  web-console-starter:
+      image: ${REGISTRY}/ypzhuang/web-console-starter:${TAG}
+      deploy:
+        replicas: ${REPLICAS}
+        restart_policy:
+          condition: on-failure
+      ports:
+        - 9080:80
+      environment:
+        - GATEWAY_URL=http://service-starter:8080
+      depends_on:
+        - service-starter   
+      networks:
+        - starter-network
+
+volumes:
+  redis_data:

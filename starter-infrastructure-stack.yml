@@ -1,0 +1,44 @@
+version: '3.2'
+networks:
+  starter-network:
+    external:
+      name: starter-network
+
+services:
+  db:
+#    user: "1000:50"
+    image: mysql:5.7
+    deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+        placement:
+          constraints: [node.role == manager]
+    volumes:
+      - ./db/config:/etc/mysql/conf.d
+      - ./db/data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATASOURCE_PASSWORD}
+      - MYSQL_DATABASE=starter
+    ports:
+      - 3306:3306
+    networks:
+      - starter-network
+
+  redis-service:
+    image: redis:4.0.12-alpine
+    deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+        placement:
+          constraints: [node.role == manager]
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - redis_data:/data
+    networks:
+      - starter-network
+
+volumes:
+  redis_data:
