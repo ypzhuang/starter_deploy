@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3.4'
 networks:
   starter-network:
     external:
@@ -13,6 +13,12 @@ services:
           condition: on-failure
       ports:
         - 8080:8080
+      healthcheck:
+        test: wget http://localhost:8080 --spider -q -O - > /dev/null 2>&1 || exit 1        
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 20s
       environment:
         - SPRING_PROFILES_ACTIVE=${PROFILE}
         - SPRING_DATASOURCE_URL=${DATASOURCE_URL}
@@ -31,6 +37,12 @@ services:
           condition: on-failure
       ports:
         - 9080:80
+      healthcheck:
+        test: wget http://localhost:80 --spider -q -O - > /dev/null 2>&1 || exit 1        
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 20s
       environment:
         - GATEWAY_URL=http://service-starter:8080
       depends_on:
